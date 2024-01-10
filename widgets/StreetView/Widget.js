@@ -28,8 +28,7 @@ define([
   'dojo/_base/declare',
   'dojo/_base/lang',
   'esri/geometry/webMercatorUtils',
-  'esri/geometry/projection',
-  'esri/geometry/SpatialReference',
+  'esri/SpatialReference',
   'jimu/BaseWidget'
   ],
 function(
@@ -117,13 +116,16 @@ function(
         var y = viewportContainer.offsetTop + viewport.offsetHeight / 2
         var coordinates = map.toMap({x: x, y: y})
         // Project the geometry to WGS84
-				outSpatialReference= new SpatialReference({ wkid: 4326 });
-				projectedgeom = projection.project(coordinates, outSpatialReference);
-				const latitude = projectedgeom.latitude;
-				const longitude = projectedgeom.longitude;
-				// Construct the Google Maps URL
-				const googleMapsUrl = `https://google.com/maps?layer=c&cbll=${latitude},${longitude}`
-				//`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latitude},${longitude}&heading=0&pitch=0&fov=80`;
+	var outSpatialReference= new SpatialReference({ wkid: 4326 });
+	var value4326 = projection.project(coordinates, outSpatialReference);
+        var value = webMercatorUtils.xyToLngLat(value4326.x, value4326.y, true);
+        console.log(value)
+
+        var googleURL = 'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='
+
+        var url = googleURL + value[1] + "," + value[0]
+
+        window.open(url)
 
 
         window.open(googleMapsUrl)
