@@ -42,7 +42,7 @@ function(
   lang,
   webMercatorUtils,
   projection,
-  SpatialReference
+  SpatialReference,
   BaseWidget) {
 
   return declare([_WidgetsInTemplateMixin, BaseWidget], {
