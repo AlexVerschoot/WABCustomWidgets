@@ -28,7 +28,6 @@ define([
   'dojo/_base/declare',
   'dojo/_base/lang',
   'esri/geometry/webMercatorUtils',
-  'esri/SpatialReference',
   'jimu/BaseWidget'
   ],
 function(
@@ -40,8 +39,6 @@ function(
   declare,
   lang,
   webMercatorUtils,
-  projection,
-  SpatialReference,
   BaseWidget) {
 
   return declare([_WidgetsInTemplateMixin, BaseWidget], {
@@ -106,7 +103,7 @@ function(
       var map = this.map
 
       element.onclick = getViewportCoordinates
-
+	  
       function getViewportCoordinates(e) {
 
         // Get the map coordinates that correspond to the middle of #street-view-viewport
@@ -115,20 +112,48 @@ function(
         var x = viewportContainer.offsetLeft + viewport.offsetWidth / 2
         var y = viewportContainer.offsetTop + viewport.offsetHeight / 2
         var coordinates = map.toMap({x: x, y: y})
-        // Project the geometry to WGS84
-	var outSpatialReference= new SpatialReference({ wkid: 4326 });
-	var value4326 = projection.project(coordinates, outSpatialReference);
-        var value = webMercatorUtils.xyToLngLat(value4326.x, value4326.y, true);
-        console.log(value)
 
-        var googleURL = 'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='
+        const apiUrl = 'https://epsg.io/trans';
+		const s_srs = 31370;
+		const t_srs = 4326;
 
-        var url = googleURL + value[1] + "," + value[0]
+		// Construct the URL with query parameters
+		const url = `${apiUrl}?x=${coordinates.x}&y=${coordinates.y}&s_srs=${s_srs}&t_srs=${t_srs}`;
 
-        window.open(url)
+		// Make the API call using fetch
+		fetch(url)
+		  .then(response => {
+			// Check if the request was successful (status code 200)
+			if (!response.ok) {
+			  throw new Error(`HTTP error! Status: ${response.status}`);
+			}
+
+			// Parse the JSON response
+			return response.json();
+		  })
+		  .then(data => {
+			// Access the x, y, and z values from the parsed JSON
+			const result = {
+			  x: data.x.toString(),
+			  y: data.y.toString(),
+			  z: data.z.toString()
+			};
+			
+			    var googleURL = 'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='
+				var url = googleURL + result.y + "," + result.x
+				window.open(url)
+
+			console.log(result);
+		  })
+		  .catch(error => {
+			console.error('Error:', error);
+		  });
+		
+		
+        //var value = webMercatorUtils.xyToLngLat(coordinates.x, coordinates.y, true);
+        //console.log(value)
 
 
-        window.open(googleMapsUrl)
 
       }
     }
