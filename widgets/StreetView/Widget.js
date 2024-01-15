@@ -149,12 +149,6 @@ function(
 			console.error('Error:', error);
 		  });
 		
-		
-        //var value = webMercatorUtils.xyToLngLat(coordinates.x, coordinates.y, true);
-        //console.log(value)
-
-
-
       }
     }
 
